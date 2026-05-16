@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { LogOut, User, Zap } from 'lucide-react';
 import { PasskeyAuth } from '../components/PasskeyAuth';
 import { MorseScanner } from '../components/MorseScanner';
+import { AudioMorseScanner } from '../components/AudioMorseScanner';
 import { DecodedDisplay } from '../components/DecodedDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,6 +12,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [capturedMessage, setCapturedMessage] = useState('');
+  const [scannerMode, setScannerMode] = useState<'camera' | 'audio'>('camera');
 
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
@@ -62,7 +64,44 @@ export default function Home() {
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-              <MorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
+              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px', width: 'fit-content', margin: '0 auto' }}>
+                <button 
+                  onClick={() => setScannerMode('camera')}
+                  style={{ 
+                    padding: '8px 24px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: scannerMode === 'camera' ? 'var(--accent)' : 'transparent',
+                    color: scannerMode === 'camera' ? '#000' : '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Camera
+                </button>
+                <button 
+                  onClick={() => setScannerMode('audio')}
+                  style={{ 
+                    padding: '8px 24px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: scannerMode === 'audio' ? 'var(--accent)' : 'transparent',
+                    color: scannerMode === 'audio' ? '#000' : '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Audio
+                </button>
+              </div>
+
+              {scannerMode === 'camera' ? (
+                <MorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
+              ) : (
+                <AudioMorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
+              )}
               
               <AnimatePresence>
                 {capturedMessage && (

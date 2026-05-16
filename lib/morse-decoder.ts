@@ -3,7 +3,7 @@
  * Processes luminance samples and outputs decoded characters.
  */
 export class MorseDecoder {
-  private lastLuminance: number = 0;
+  private lastSignal: number = 0;
   private high: boolean = false;
   private signalStart: number = 0;
   private signalEnd: number = 0;
@@ -12,8 +12,8 @@ export class MorseDecoder {
   private dotDurations: number[] = [];      // recent high‑pulse lengths
   private symbolBuffer: string = '';        // dots & dashes of current character
   private decodedText: string = '';
-  private minLuminance: number = 255;
-  private maxLuminance: number = 0;
+  private minSignal: number = 255;
+  private maxSignal: number = 0;
   private threshold: number = 150;
   private onChar: (char: string) => void;
 
@@ -38,21 +38,21 @@ export class MorseDecoder {
     this.onChar = onChar;
   }
 
-  /** Call with a luminance value (0‑255) and current timestamp (ms) */
-  feed(luminance: number, now: number) {
+  /** Call with a signal value (0‑255) and current timestamp (ms) */
+  feed(signal: number, now: number) {
     // Auto-calibrate threshold
-    if (luminance < this.minLuminance) this.minLuminance = luminance;
-    if (luminance > this.maxLuminance) this.maxLuminance = luminance;
+    if (signal < this.minSignal) this.minSignal = signal;
+    if (signal > this.maxSignal) this.maxSignal = signal;
     
     // Threshold is halfway between min and max seen (with a floor)
-    const range = this.maxLuminance - this.minLuminance;
+    const range = this.maxSignal - this.minSignal;
     if (range > 20) {
-      this.threshold = this.minLuminance + range * 0.6; // 60% up from min
+      this.threshold = this.minSignal + range * 0.6; // 60% up from min
     }
 
-    const isHigh = luminance > this.threshold;
+    const isHigh = signal > this.threshold;
 
-    // Rising edge: light turned ON
+    // Rising edge: signal turned ON
     if (isHigh && !this.high) {
       this.high = true;
       this.signalStart = now;
@@ -63,7 +63,7 @@ export class MorseDecoder {
         this.handleGap(lowDuration);
       }
     }
-    // Falling edge: light turned OFF
+    // Falling edge: signal turned OFF
     else if (!isHigh && this.high) {
       this.high = false;
       this.signalEnd = now;
@@ -81,7 +81,7 @@ export class MorseDecoder {
       }
     }
 
-    this.lastLuminance = luminance;
+    this.lastSignal = signal;
   }
 
   private recordSymbol(duration: number) {
@@ -131,7 +131,7 @@ export class MorseDecoder {
 
   /** Get the current min/max for UI feedback */
   getRange(): { min: number, max: number } {
-    return { min: this.minLuminance, max: this.maxLuminance };
+    return { min: this.minSignal, max: this.maxSignal };
   }
 
   reset() {
@@ -139,8 +139,8 @@ export class MorseDecoder {
     this.symbolBuffer = '';
     this.dotDurations = [];
     this.dotDuration = 0;
-    this.minLuminance = 255;
-    this.maxLuminance = 0;
+    this.minSignal = 255;
+    this.maxSignal = 0;
     this.threshold = 150;
   }
 }
