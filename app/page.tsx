@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, User, Zap } from 'lucide-react';
+import { LogOut, User, Zap, Camera, Mic } from 'lucide-react';
 import { PasskeyAuth } from '../components/PasskeyAuth';
 import { MorseScanner } from '../components/MorseScanner';
 import { AudioMorseScanner } from '../components/AudioMorseScanner';
 import { DecodedDisplay } from '../components/DecodedDisplay';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -14,16 +14,30 @@ export default function Home() {
   const [capturedMessage, setCapturedMessage] = useState('');
   const [scannerMode, setScannerMode] = useState<'camera' | 'audio'>('camera');
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20,
+      transition: { duration: 0.4 }
+    }
+  };
+
   return (
-    <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
+    <main className="main-container">
       <AnimatePresence mode="wait">
         {!isLoggedIn ? (
           <motion.div
             key="auth"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
             <PasskeyAuth onSuccess={(name) => {
               setIsLoggedIn(true);
@@ -33,82 +47,87 @@ export default function Home() {
         ) : (
           <motion.div
             key="app"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <div style={{ padding: '0.5rem', background: 'var(--accent)', borderRadius: '12px', boxShadow: '0 0 20px var(--accent)' }}>
-                  <Zap size={24} color="#000" fill="currentColor" />
+            <header className="app-header">
+              <div className="brand">
+                <div className="brand-icon">
+                  <Zap size={20} fill="currentColor" />
                 </div>
-                <h1 style={{ fontSize: '1.5rem', background: 'linear-gradient(to right, #fff, #888)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.1em' }}>
-                  MORSE PRO
-                </h1>
+                <h1 className="brand-name">Morse Pro</h1>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px var(--primary-glow)' }}>
-                    <User size={16} />
+
+              <div className="user-profile">
+                <div className="user-info">
+                  <div className="avatar">
+                    <User size={14} />
                   </div>
-                  <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>{username}</span>
+                  <span className="username">{username}</span>
                 </div>
                 <button 
                   onClick={() => setIsLoggedIn(false)} 
-                  style={{ background: 'none', border: 'none', color: '#ff4b4b', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.2rem' }}
+                  className="logout-button"
                   title="Log out"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                 </button>
               </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px', width: 'fit-content', margin: '0 auto' }}>
+            <div className="app-content">
+              <div className="mode-switcher">
                 <button 
                   onClick={() => setScannerMode('camera')}
-                  style={{ 
-                    padding: '8px 24px', 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    background: scannerMode === 'camera' ? 'var(--accent)' : 'transparent',
-                    color: scannerMode === 'camera' ? '#000' : '#fff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
+                  className={`mode-button ${scannerMode === 'camera' ? 'active' : ''}`}
                 >
-                  Camera
+                  <div className="mode-btn-content">
+                    <Camera size={16} />
+                    <span>Camera</span>
+                  </div>
                 </button>
                 <button 
                   onClick={() => setScannerMode('audio')}
-                  style={{ 
-                    padding: '8px 24px', 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    background: scannerMode === 'audio' ? 'var(--accent)' : 'transparent',
-                    color: scannerMode === 'audio' ? '#000' : '#fff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
+                  className={`mode-button ${scannerMode === 'audio' ? 'active' : ''}`}
                 >
-                  Audio
+                  <div className="mode-btn-content">
+                    <Mic size={16} />
+                    <span>Audio</span>
+                  </div>
                 </button>
               </div>
 
-              {scannerMode === 'camera' ? (
-                <MorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
-              ) : (
-                <AudioMorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
-              )}
+              <div className="scanner-section">
+                {scannerMode === 'camera' ? (
+                  <motion.div
+                    key="camera-scanner"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <MorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="audio-scanner"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <AudioMorseScanner onMessageDecoded={(msg) => setCapturedMessage(msg)} />
+                  </motion.div>
+                )}
+              </div>
               
               <AnimatePresence>
                 {capturedMessage && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="display-section"
                   >
                     <DecodedDisplay 
                       message={capturedMessage} 
@@ -119,12 +138,112 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <footer style={{ marginTop: '4rem', textAlign: 'center', opacity: 0.3, fontSize: '0.8rem' }}>
-              <p>&copy; 2026 Morse Decrypt App &bull; Vercel Production Build</p>
+            <footer className="app-footer">
+              <p>&copy; 2026 Morse Pro &bull; Minimalist Intelligence</p>
             </footer>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style jsx>{`
+        .app-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 3rem;
+        }
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        .brand-icon {
+          padding: 0.5rem;
+          background: var(--foreground);
+          color: var(--background);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .brand-name {
+          font-size: 1.25rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+        }
+        .user-profile {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: var(--card-bg);
+          padding: 4px;
+          border-radius: 100px;
+          border: 1px solid var(--card-border);
+        }
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0 0.75rem 0 0.5rem;
+        }
+        .avatar {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: var(--glass);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--card-border);
+        }
+        .username {
+          font-weight: 500;
+          font-size: 0.85rem;
+          opacity: 0.8;
+        }
+        .logout-button {
+          background: var(--glass);
+          border: 1px solid var(--card-border);
+          color: var(--error);
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+        .logout-button:hover {
+          background: var(--error);
+          color: white;
+          border-color: var(--error);
+        }
+        .app-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2.5rem;
+        }
+        .mode-btn-content {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .scanner-section {
+          min-height: 400px;
+        }
+        .display-section {
+          margin-top: 1rem;
+        }
+        .app-footer {
+          margin-top: 5rem;
+          text-align: center;
+          opacity: 0.3;
+          font-size: 0.75rem;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+      `}</style>
     </main>
   );
 }

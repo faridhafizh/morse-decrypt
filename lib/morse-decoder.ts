@@ -40,14 +40,23 @@ export class MorseDecoder {
 
   /** Call with a signal value (0‑255) and current timestamp (ms) */
   feed(signal: number, now: number) {
-    // Auto-calibrate threshold
+    // Auto-calibrate threshold with slow adaptation
+    // We let the min/max signals slowly drift towards the current signal
+    // to adapt to changing environmental conditions.
+    const adaptationRate = 0.002; 
+    this.minSignal = this.minSignal * (1 - adaptationRate) + signal * adaptationRate;
+    this.maxSignal = this.maxSignal * (1 - adaptationRate) + signal * adaptationRate;
+
     if (signal < this.minSignal) this.minSignal = signal;
     if (signal > this.maxSignal) this.maxSignal = signal;
     
-    // Threshold is halfway between min and max seen (with a floor)
+    // Threshold is 60% up from min in the current range
     const range = this.maxSignal - this.minSignal;
-    if (range > 20) {
-      this.threshold = this.minSignal + range * 0.6; // 60% up from min
+    if (range > 15) { // Minimum range to consider it a valid signal vs noise
+      this.threshold = this.minSignal + range * 0.6;
+    } else {
+      // If range is too small, keep threshold high to avoid noise triggers
+      this.threshold = this.minSignal + 20; 
     }
 
     const isHigh = signal > this.threshold;
@@ -72,6 +81,11 @@ export class MorseDecoder {
 
       if (highDuration > this.MIN_UNIT_MS) {
         this.dotDurations.push(highDuration);
+        // Keep only recent durations for adaptive speed (sliding window)
+        if (this.dotDurations.length > 15) {
+          this.dotDurations.shift();
+        }
+
         // Estimate dot length from the median of the last few pulses
         if (this.dotDurations.length >= 3) {
           const sorted = [...this.dotDurations].sort((a, b) => a - b);

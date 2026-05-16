@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Camera, CameraOff, Square, Play } from 'lucide-react';
+import { Camera as CameraIcon, CameraOff, Square, Play, Scan } from 'lucide-react';
 import { MorseDecoder } from '../lib/morse-decoder';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MorseScannerProps {
   onMessageDecoded: (message: string) => void;
@@ -23,7 +24,7 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
     setCameraError('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       });
 
@@ -33,7 +34,7 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
       }
 
       const decoder = new MorseDecoder((char) => {
-        // Handled in the text update
+        // Handled via getText()
       });
       decoderRef.current = decoder;
       setScanning(true);
@@ -51,7 +52,7 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
         }
 
         // Sample a small square in the center
-        const size = 20;
+        const size = 30;
         const x = (videoRef.current.videoWidth - size) / 2;
         const y = (videoRef.current.videoHeight - size) / 2;
         
@@ -99,94 +100,221 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
   }, []);
 
   return (
-    <div className="premium-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Camera size={24} color="#00dfd8" />
-          Morse Scanner
-        </h2>
+    <div className="scanner-card premium-card">
+      <div className="scanner-header">
+        <div className="title-group">
+          <CameraIcon size={20} />
+          <h2>Camera Scanner</h2>
+        </div>
         {scanning && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00dfd8' }}>
+          <div className="status-badge">
             <span className="pulse-dot"></span>
-            LIVE
+            <span>Live Detection</span>
           </div>
         )}
       </div>
 
-      <div className="camera-container">
+      <div className="camera-viewport camera-container">
         <video
           ref={videoRef}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: scanning ? 'block' : 'none' }}
+          className="video-feed"
           muted
           playsInline
         />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
         
-        {scanning && (
-          <>
-            <div className="scanner-overlay">
+        <AnimatePresence>
+          {scanning && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="scanner-overlay"
+            >
               <div className="scanning-line"></div>
-              {/* Center Target */}
-              <div style={{ position: 'absolute', top: '50%', left: '50%', width: 40, height: 40, border: '2px solid var(--accent)', transform: 'translate(-50%, -50%)', borderRadius: 4 }}></div>
-            </div>
-            {/* Signal Meter */}
-            <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                <div style={{ 
-                    width: `${(signal.value / 255) * 100}%`, 
-                    height: '100%', 
-                    background: signal.value > signal.threshold ? 'var(--accent)' : '#ff4b4b',
-                    boxShadow: signal.value > signal.threshold ? '0 0 10px var(--accent)' : 'none',
-                    transition: 'width 0.05s linear'
-                }}></div>
-                <div style={{ position: 'absolute', left: `${(signal.threshold / 255) * 100}%`, top: -5, width: 2, height: 14, background: '#fff' }}></div>
-            </div>
-          </>
-        )}
+              <div className="center-target">
+                <Scan size={40} strokeWidth={1} />
+              </div>
+              
+              <div className="signal-meter-container">
+                <div className="signal-labels">
+                  <span>Signal</span>
+                  <span>{Math.round(signal.value)}</span>
+                </div>
+                <div className="meter-track">
+                  <div 
+                    className="meter-fill"
+                    style={{ 
+                      width: `${(signal.value / 255) * 100}%`,
+                      background: signal.value > signal.threshold ? 'var(--primary)' : 'var(--secondary)'
+                    }}
+                  />
+                  <div 
+                    className="threshold-marker"
+                    style={{ left: `${(signal.threshold / 255) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!scanning && (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-            <CameraOff size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-            <p style={{ opacity: 0.6, maxWidth: '280px' }}>Point your camera at a flashing light source to begin decoding.</p>
+          <div className="camera-placeholder">
+            <CameraOff size={48} />
+            <p>Point your camera at a flashing light source</p>
           </div>
         )}
       </div>
 
-      <div style={{ marginTop: '1.5rem' }}>
+      <div className="scanner-controls">
         {scanning ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div className="morse-display">
-              {liveText || <span style={{ opacity: 0.3 }}>Waiting for signal...</span>}
+          <div className="active-controls">
+            <div className="morse-display-minimal">
+              {liveText || <span className="placeholder">Awaiting signal...</span>}
             </div>
-            <button className="glass-button" style={{ background: '#ff4b4b', boxShadow: '0 4px 14px 0 rgba(255, 75, 75, 0.4)' }} onClick={stopScanning}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Square size={18} fill="currentColor" />
-                Stop & Capture
-              </div>
+            <button className="glass-button danger" onClick={stopScanning}>
+              <Square size={16} fill="currentColor" />
+              Stop & Decode
             </button>
           </div>
         ) : (
-          <button className="glass-button" style={{ width: '100%' }} onClick={startScanning}>
-             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Play size={18} fill="currentColor" />
-                Start Scanner
-              </div>
+          <button className="glass-button" onClick={startScanning}>
+            <Play size={16} fill="currentColor" />
+            Start Scanner
           </button>
         )}
-        {cameraError && <p style={{ color: '#ff4b4b', marginTop: '1rem', fontSize: '0.9rem' }}>{cameraError}</p>}
+        {cameraError && <p className="error-message">{cameraError}</p>}
       </div>
 
       <style jsx>{`
-        .pulse-dot {
-          width: 8px;
-          height: 8px;
-          background: #00dfd8;
-          border-radius: 50%;
-          animation: pulse 1.5s infinite;
+        .scanner-card {
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
         }
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.5); opacity: 0.5; }
-          100% { transform: scale(1); opacity: 1; }
+        .scanner-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .title-group {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          color: var(--secondary);
+        }
+        .title-group h2 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--foreground);
+        }
+        .status-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--error);
+          background: rgba(255, 69, 58, 0.1);
+          padding: 4px 10px;
+          border-radius: 100px;
+        }
+        .camera-viewport {
+          height: 380px;
+          background: #000;
+        }
+        .video-feed {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .center-target {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: rgba(255, 255, 255, 0.4);
+        }
+        .signal-meter-container {
+          position: absolute;
+          bottom: 24px;
+          left: 24px;
+          right: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .signal-labels {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          opacity: 0.6;
+        }
+        .meter-track {
+          height: 4px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+          position: relative;
+        }
+        .meter-fill {
+          height: 100%;
+          border-radius: 2px;
+          transition: width 0.05s linear;
+        }
+        .threshold-marker {
+          position: absolute;
+          top: -4px;
+          width: 2px;
+          height: 12px;
+          background: #fff;
+          border-radius: 1px;
+        }
+        .camera-placeholder {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1.5rem;
+          opacity: 0.2;
+        }
+        .camera-placeholder p {
+          max-width: 200px;
+          text-align: center;
+          font-size: 0.9rem;
+        }
+        .active-controls {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .morse-display-minimal {
+          background: var(--glass);
+          border-radius: 14px;
+          padding: 1.25rem;
+          font-family: 'SF Mono', monospace;
+          font-size: 1.25rem;
+          min-height: 4rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--card-border);
+          text-align: center;
+        }
+        .placeholder {
+          opacity: 0.3;
+          font-size: 1rem;
+        }
+        .error-message {
+          color: var(--error);
+          font-size: 0.85rem;
+          text-align: center;
         }
       `}</style>
     </div>

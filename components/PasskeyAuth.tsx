@@ -1,17 +1,18 @@
 'use client';
 
-import React from 'react';
-import { Fingerprint, Key } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Fingerprint, Key, Plus } from 'lucide-react';
 import { base64urlToBuffer, bufferToBase64url, loadCredentials, saveCredential } from '../lib/webauthn-utils';
+import { motion } from 'framer-motion';
 
 interface PasskeyAuthProps {
   onSuccess: (username: string) => void;
 }
 
 export const PasskeyAuth: React.FC<PasskeyAuthProps> = ({ onSuccess }) => {
-  const [credCount, setCredCount] = React.useState(0);
+  const [credCount, setCredCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Fallback for randomUUID if not in a secure context
   const getUUID = () => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID();
@@ -21,18 +22,20 @@ export const PasskeyAuth: React.FC<PasskeyAuthProps> = ({ onSuccess }) => {
     );
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCredCount(loadCredentials().length);
   }, []);
+
   const registerPasskey = async () => {
+    setLoading(true);
     try {
       const challenge = getUUID();
       const publicKey: PublicKeyCredentialCreationOptions = {
         challenge: base64urlToBuffer(btoa(challenge)),
-        rp: { name: 'Morse WebApp', id: window.location.hostname },
+        rp: { name: 'Morse Pro', id: window.location.hostname },
         user: {
           id: new Uint8Array(16),
-          name: 'user@morse.app',
+          name: 'user@morse.pro',
           displayName: 'Morse User',
         },
         pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
@@ -53,20 +56,19 @@ export const PasskeyAuth: React.FC<PasskeyAuthProps> = ({ onSuccess }) => {
         transports: (cred as any).response?.getTransports?.() ?? [],
       });
 
-      onSuccess('User (passkey)');
+      onSuccess('User');
     } catch (err: any) {
-      alert('Registration failed: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const loginPasskey = async () => {
+    if (credCount === 0) return;
+    setLoading(true);
     try {
       const storedCreds = loadCredentials();
-      if (storedCreds.length === 0) {
-        alert('No credentials found. Please register first.');
-        return;
-      }
-
       const challenge = getUUID();
       const allowCredentials: PublicKeyCredentialDescriptor[] = storedCreds.map(c => ({
         id: base64urlToBuffer(c.id),
@@ -84,40 +86,101 @@ export const PasskeyAuth: React.FC<PasskeyAuthProps> = ({ onSuccess }) => {
       const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential;
       if (!assertion) throw new Error('No assertion returned');
 
-      onSuccess('User (passkey)');
+      onSuccess('User');
     } catch (err: any) {
-      alert('Login failed: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="premium-card" style={{ maxWidth: 480, margin: '4rem auto', textAlign: 'center' }}>
-      <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0,112,243,0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-        <Fingerprint size={48} color="#0070f3" />
-      </div>
-      <h1 style={{ marginBottom: '0.5rem' }}>Morse WebApp</h1>
-      <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
-        Securely access your Morse decryptor using passkeys.
-      </p>
+    <div className="auth-card premium-card">
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="auth-icon-wrapper"
+      >
+        <Fingerprint size={48} strokeWidth={1.5} />
+      </motion.div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <button className="glass-button" onClick={loginPasskey}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <Key size={18} />
-            Log in with Passkey {credCount > 0 && `(${credCount} found)`}
-          </div>
+      <div className="auth-header">
+        <h1>Welcome to Morse Pro</h1>
+        <p>Access your professional Morse decryptor securely with Biometrics or Passkey.</p>
+      </div>
+      
+      <div className="auth-actions">
+        <button 
+          className="glass-button" 
+          onClick={loginPasskey}
+          disabled={loading || credCount === 0}
+          style={{ opacity: credCount === 0 ? 0.5 : 1 }}
+        >
+          <Key size={18} />
+          {loading ? 'Authenticating...' : `Sign in with Passkey ${credCount > 0 ? `(${credCount})` : ''}`}
         </button>
-        <button className="glass-button secondary" onClick={async () => {
-          await registerPasskey();
-          setCredCount(loadCredentials().length);
-        }}>
-          Register New Device
+        
+        <button 
+          className="glass-button secondary" 
+          onClick={registerPasskey}
+          disabled={loading}
+        >
+          <Plus size={18} />
+          {credCount === 0 ? 'Set up Passkey' : 'Register New Device'}
         </button>
       </div>
 
-      <p style={{ fontSize: '0.75rem', marginTop: '2.5rem', color: 'rgba(255,255,255,0.4)' }}>
-        Demo: credentials are stored in your browser&apos;s localStorage.
-      </p>
+      <footer className="auth-footer">
+        <p>Your biometric data never leaves your device.</p>
+      </footer>
+
+      <style jsx>{`
+        .auth-card {
+          max-width: 420px;
+          margin: 6rem auto;
+          text-align: center;
+          padding: 3rem 2rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2rem;
+        }
+        .auth-icon-wrapper {
+          width: 80px;
+          height: 80px;
+          background: var(--glass);
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--primary);
+          border: 1px solid var(--card-border);
+        }
+        .auth-header h1 {
+          font-size: 1.75rem;
+          margin-bottom: 0.75rem;
+          letter-spacing: -0.03em;
+        }
+        .auth-header p {
+          color: var(--secondary);
+          font-size: 0.95rem;
+          line-height: 1.5;
+          max-width: 300px;
+          margin: 0 auto;
+        }
+        .auth-actions {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .auth-footer {
+          margin-top: 1rem;
+          opacity: 0.4;
+          font-size: 0.75rem;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,48 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
-
 :root {
-  --background: #050505;
+  --background: #000000;
   --foreground: #ffffff;
-  --primary: #0070f3;
-  --primary-glow: rgba(0, 112, 243, 0.4);
-  --secondary: #7928ca;
-  --accent: #00dfd8;
-  --card-bg: rgba(255, 255, 255, 0.03);
+  --primary: #007aff; /* Apple Blue */
+  --secondary: #8e8e93;
+  --accent: #5e5ce6;
+  --card-bg: rgba(28, 28, 30, 0.7);
   --card-border: rgba(255, 255, 255, 0.1);
   --glass: rgba(255, 255, 255, 0.05);
+  --success: #32d74b;
+  --error: #ff453a;
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   min-height: 100vh;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 h1, h2, h3 {
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.main-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
 }
 
 .premium-card {
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: saturate(180%) blur(20px);
   border: 1px solid var(--card-border);
-  border-radius: 24px;
-  padding: 2rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.premium-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-button {
@@ -52,62 +55,64 @@ h1, h2, h3 {
   border-radius: 12px;
   padding: 0.8rem 1.6rem;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px 0 var(--primary-glow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .glass-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 118, 255, 0.23);
+  transform: scale(1.02);
   filter: brightness(1.1);
 }
 
 .glass-button:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .glass-button.secondary {
   background: var(--glass);
   border: 1px solid var(--card-border);
-  box-shadow: none;
 }
 
 .glass-button.secondary:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.glass-button.danger {
+  background: var(--error);
+}
+
 .morse-display {
-  font-family: 'JetBrains Mono', monospace;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
+  font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
   padding: 1.5rem;
-  font-size: 1.5rem;
-  min-height: 4rem;
-  color: var(--accent);
-  text-shadow: 0 0 10px rgba(0, 223, 216, 0.3);
+  font-size: 1.25rem;
+  min-height: 4.5rem;
+  color: var(--foreground);
+  border: 1px solid var(--card-border);
   word-break: break-all;
 }
 
 .camera-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 20px;
+  aspect-ratio: 16 / 10;
+  border-radius: 24px;
   overflow: hidden;
-  background: #000;
-  border: 2px solid var(--card-border);
+  background: #1c1c1e;
+  border: 1px solid var(--card-border);
 }
 
 .scanner-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.4) 100%);
-  border: 1px solid rgba(0, 223, 216, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .scanning-line {
@@ -115,17 +120,43 @@ h1, h2, h3 {
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 15px var(--accent);
-  animation: scan 2s linear infinite;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--primary), transparent);
+  animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes scan {
-  0% { top: 0; opacity: 0; }
+  0% { transform: translateY(0); opacity: 0; }
   10% { opacity: 1; }
   90% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+  100% { transform: translateY(1000%); opacity: 0; }
+}
+
+.mode-switcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 14px;
+  width: fit-content;
+  margin: 0 auto;
+  border: 1px solid var(--card-border);
+}
+
+.mode-button {
+  padding: 8px 24px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mode-button.active {
+  background: var(--foreground);
+  color: var(--background);
 }
 
 input, textarea {
@@ -136,10 +167,36 @@ input, textarea {
   padding: 1rem;
   font-family: inherit;
   font-size: 1rem;
+  width: 100%;
+  transition: all 0.2s ease;
 }
 
 input:focus, textarea:focus {
   outline: none;
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--error);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.4); }
+  70% { transform: scale(1.1); opacity: 0.7; box-shadow: 0 0 0 10px rgba(255, 69, 58, 0); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
 }
