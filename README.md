@@ -1,8 +1,4 @@
-# MORSE PRO
-
 ![MORSE PRO Banner](public/banner.png)
-
-## Overview
 
 **Morse Pro** is a high-performance, real-time Morse code decryption application built with Next.js. It leverages computer vision techniques to decode Morse code signals from light sources captured via the device camera. Featuring a premium glassmorphic UI and secure Passkey (WebAuthn) authentication, it offers a state-of-the-art experience for Morse code communication.
 
