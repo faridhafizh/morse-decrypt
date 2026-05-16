@@ -189,10 +189,10 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
 
       <style jsx>{`
         .scanner-card {
-          padding: 1.5rem;
+          padding: 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
         .scanner-header {
           display: flex;
@@ -224,7 +224,7 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
           border-radius: 100px;
         }
         .camera-viewport {
-          height: 380px;
+          height: 280px;
           background: #000;
         }
         .video-feed {
@@ -296,11 +296,11 @@ export const MorseScanner: React.FC<MorseScannerProps> = ({ onMessageDecoded }) 
         }
         .morse-display-minimal {
           background: var(--glass);
-          border-radius: 14px;
-          padding: 1.25rem;
+          border-radius: 12px;
+          padding: 0.8rem;
           font-family: 'SF Mono', monospace;
-          font-size: 1.25rem;
-          min-height: 4rem;
+          font-size: 1.1rem;
+          min-height: 3rem;
           display: flex;
           align-items: center;
           justify-content: center;

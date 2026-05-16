@@ -200,10 +200,10 @@ export const AudioMorseScanner: React.FC<AudioMorseScannerProps> = ({ onMessageD
 
       <style jsx>{`
         .scanner-card {
-          padding: 1.5rem;
+          padding: 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
         .scanner-header {
           display: flex;
@@ -235,7 +235,7 @@ export const AudioMorseScanner: React.FC<AudioMorseScannerProps> = ({ onMessageD
           border-radius: 100px;
         }
         .audio-viewport {
-          height: 380px;
+          height: 240px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -294,11 +294,11 @@ export const AudioMorseScanner: React.FC<AudioMorseScannerProps> = ({ onMessageD
         }
         .morse-display-minimal {
           background: var(--glass);
-          border-radius: 14px;
-          padding: 1.25rem;
+          border-radius: 12px;
+          padding: 0.8rem;
           font-family: 'SF Mono', monospace;
-          font-size: 1.25rem;
-          min-height: 4rem;
+          font-size: 1.1rem;
+          min-height: 3rem;
           display: flex;
           align-items: center;
           justify-content: center;

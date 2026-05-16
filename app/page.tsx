@@ -150,7 +150,7 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 3rem;
+          margin-bottom: 1.5rem;
         }
         .brand {
           display: flex;
@@ -158,16 +158,16 @@ export default function Home() {
           gap: 0.75rem;
         }
         .brand-icon {
-          padding: 0.5rem;
+          padding: 0.4rem;
           background: var(--foreground);
           color: var(--background);
-          border-radius: 10px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
         .brand-name {
-          font-size: 1.25rem;
+          font-size: 1.1rem;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -176,7 +176,7 @@ export default function Home() {
           align-items: center;
           gap: 0.5rem;
           background: var(--card-bg);
-          padding: 4px;
+          padding: 3px;
           border-radius: 100px;
           border: 1px solid var(--card-border);
         }
@@ -184,11 +184,11 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0 0.75rem 0 0.5rem;
+          padding: 0 0.6rem 0 0.4rem;
         }
         .avatar {
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
           background: var(--glass);
           display: flex;
@@ -198,15 +198,15 @@ export default function Home() {
         }
         .username {
           font-weight: 500;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           opacity: 0.8;
         }
         .logout-button {
           background: var(--glass);
           border: 1px solid var(--card-border);
           color: var(--error);
-          width: 32px;
-          height: 32px;
+          width: 28px;
+          height: 28px;
           border-radius: 50%;
           cursor: pointer;
           display: flex;
@@ -222,7 +222,7 @@ export default function Home() {
         .app-content {
           display: flex;
           flex-direction: column;
-          gap: 2.5rem;
+          gap: 1.5rem;
         }
         .mode-btn-content {
           display: flex;
@@ -230,16 +230,16 @@ export default function Home() {
           gap: 0.5rem;
         }
         .scanner-section {
-          min-height: 400px;
+          min-height: auto;
         }
         .display-section {
-          margin-top: 1rem;
+          margin-top: 0.5rem;
         }
         .app-footer {
-          margin-top: 5rem;
+          margin-top: 2.5rem;
           text-align: center;
           opacity: 0.3;
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           letter-spacing: 0.05em;
           text-transform: uppercase;
         }
